@@ -1,0 +1,778 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Taller Ribes Motor</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Figtree:wght@400;500;600&display=swap">
+<style>
+/* Layout: cabecera sencilla; hero a dos columnas con la reserva de cita como pieza principal; debajo, secciones de lectura con filetes finos. */
+:root {
+  --bg: #F3F4F6;
+  --surface: #FFFFFF;
+  --ink: #15202B;
+  --muted: #556270;
+  --line: #D9DEE4;
+  --accent: #C2570C;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #FBE6D6;
+  --busy: #9AA5B1;
+  --danger: #A33A3A;
+  --font-display: 'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'Figtree', 'Segoe UI', system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F1720;
+    --surface: #16212C;
+    --ink: #E8EDF2;
+    --muted: #9FB0C0;
+    --line: #263544;
+    --accent: #F59A4D;
+    --accent-ink: #2A1204;
+    --accent-soft: #2E2118;
+    --busy: #566677;
+    --danger: #F08A8A;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0F1720;
+  --surface: #16212C;
+  --ink: #E8EDF2;
+  --muted: #9FB0C0;
+  --line: #263544;
+  --accent: #F59A4D;
+  --accent-ink: #2A1204;
+  --accent-soft: #2E2118;
+  --busy: #566677;
+  --danger: #F08A8A;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+}
+h1, h2, h3 { font-family: var(--font-display); font-weight: 650; line-height: 1.1; letter-spacing: -0.02em; text-wrap: balance; margin: 0; }
+p { margin: 0; }
+a { color: inherit; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.wrap {
+  max-width: 1120px;
+  margin-inline: auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* Aviso de muestra */
+.demo { background: var(--ink); color: var(--bg); font-size: 13px; }
+.demo .wrap { padding-block: 8px; display: flex; gap: 8px 16px; flex-wrap: wrap; justify-content: center; text-align: center; }
+
+/* Cabecera */
+.top { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 20px; }
+.brand { text-decoration: none; display: flex; flex-direction: column; line-height: 1.2; }
+.brand b { font-family: var(--font-display); font-size: 1.2rem; font-weight: 650; letter-spacing: -0.01em; }
+.brand span { font-size: 13px; color: var(--muted); }
+.nav { display: flex; align-items: center; gap: 28px; }
+.nav a.link { text-decoration: none; font-size: 15px; color: var(--muted); }
+.nav a.link:hover { color: var(--ink); }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  background: var(--accent); color: var(--accent-ink);
+  border: 0; border-radius: 999px; padding: 11px 22px;
+  font-weight: 600; font-size: 15px; text-decoration: none; cursor: pointer;
+}
+.btn:hover { filter: brightness(1.08); }
+.btn:disabled { background: var(--line); color: var(--muted); cursor: not-allowed; filter: none; }
+.btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+.btn.ghost:hover { border-color: var(--ink); filter: none; }
+
+/* Hero */
+.hero { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: 56px; align-items: start; padding-block: 36px 72px; }
+.eyebrow { font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); font-weight: 600; margin-bottom: 18px; }
+.hero h1 { font-size: clamp(2.2rem, 4.6vw, 3.7rem); }
+.lead { margin-top: 22px; font-size: 1.12rem; color: var(--muted); max-width: 52ch; }
+.facts { list-style: none; padding: 0; margin: 32px 0 0; display: grid; gap: 12px; max-width: 52ch; }
+.facts li { display: flex; gap: 12px; align-items: baseline; padding-top: 12px; border-top: 1px solid var(--line); font-size: 15px; }
+.facts b { min-width: 132px; font-weight: 600; }
+.facts span { color: var(--muted); }
+.next-free { margin-top: 28px; display: inline-flex; align-items: center; gap: 10px; background: var(--accent-soft); border-radius: 999px; padding: 8px 16px 8px 12px; font-size: 14px; }
+.next-free i { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); display: block; }
+
+/* Tarjeta de reserva */
+.book { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 24px; box-shadow: 0 18px 40px -24px rgba(18, 41, 44, 0.35); min-width: 0; scroll-margin-top: 16px; }
+.book h2 { font-size: 1.45rem; }
+.steps { display: flex; gap: 8px; margin: 16px 0 22px; padding: 0; list-style: none; }
+.steps li { flex: 1; font-size: 12.5px; color: var(--muted); border-top: 3px solid var(--line); padding-top: 8px; }
+.steps li.on { color: var(--ink); border-color: var(--accent); font-weight: 600; }
+.steps li.done { border-color: var(--accent); }
+.label { font-size: 13px; font-weight: 600; margin-bottom: 8px; display: block; }
+.opts { display: grid; gap: 8px; }
+.opt { text-align: left; width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: flex; justify-content: space-between; gap: 12px; align-items: center; cursor: pointer; }
+.opt:hover { border-color: var(--muted); }
+.opt[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent); }
+.opt small { display: block; color: var(--muted); font-size: 13px; line-height: 1.35; }
+.opt b { font-weight: 600; }
+.opt .price { font-family: var(--font-display); font-weight: 650; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.seg { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 4px; margin-top: 16px; }
+.seg button { border: 0; background: transparent; border-radius: 9px; padding: 9px 8px; cursor: pointer; font-size: 14.5px; }
+.seg button[aria-pressed="true"] { background: var(--surface); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18); font-weight: 600; }
+
+.cal-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+.cal-head span { font-size: 13px; color: var(--muted); text-transform: capitalize; }
+.cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
+.cal .wd { text-align: center; font-size: 12px; color: var(--muted); padding-bottom: 2px; }
+.day { aspect-ratio: 1; min-height: 38px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); cursor: pointer; font-variant-numeric: tabular-nums; font-size: 14.5px; padding: 0; }
+.day:hover:not(:disabled) { border-color: var(--accent); }
+.day:disabled { background: transparent; border-color: transparent; color: var(--busy); cursor: not-allowed; }
+.day[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
+.slots { margin-top: 18px; display: grid; gap: 12px; }
+.slot-label { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+.slot-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); gap: 6px; }
+.slot { border: 1px solid var(--line); background: var(--bg); border-radius: 10px; padding: 8px 0; cursor: pointer; font-variant-numeric: tabular-nums; font-size: 14.5px; }
+.slot:hover { border-color: var(--accent); }
+.slot[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
+.hint { color: var(--muted); font-size: 14px; }
+
+.field { display: grid; gap: 6px; margin-bottom: 14px; }
+.field input, .field textarea { width: 100%; font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.field textarea { resize: vertical; min-height: 76px; }
+.field input:focus, .field textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+.field.bad input { border-color: var(--danger); }
+.err { color: var(--danger); font-size: 13px; min-height: 0; }
+.check { display: flex; gap: 10px; align-items: flex-start; font-size: 13.5px; color: var(--muted); margin-bottom: 6px; }
+.check input { margin-top: 4px; accent-color: var(--accent); width: 16px; height: 16px; flex: none; }
+
+.foot { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.summary { font-size: 13.5px; color: var(--muted); min-width: 0; flex: 1 1 180px; }
+.summary b { color: var(--ink); font-weight: 600; }
+.actions { display: flex; gap: 8px; }
+
+.done { text-align: left; }
+.done .tick { width: 44px; height: 44px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; margin-bottom: 14px; }
+.done dl { margin: 18px 0; display: grid; grid-template-columns: auto 1fr; gap: 8px 16px; font-size: 15px; }
+.done dt { color: var(--muted); }
+.done dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
+.note { background: var(--accent-soft); border-radius: 12px; padding: 12px 14px; font-size: 13.5px; margin-bottom: 18px; }
+
+/* Secciones */
+.sec { padding-block: 72px; border-top: 1px solid var(--line); scroll-margin-top: 8px; }
+.sec h2 { font-size: clamp(1.7rem, 3.2vw, 2.4rem); max-width: 20ch; }
+.sec .intro { margin-top: 14px; color: var(--muted); max-width: 58ch; }
+.areas { margin-top: 36px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 40px; }
+.areas div { padding-block: 18px; border-top: 1px solid var(--line); }
+.areas h3 { font-size: 1.12rem; margin-bottom: 6px; }
+.areas p { color: var(--muted); font-size: 15px; }
+
+.process { margin-top: 36px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px; padding: 0; list-style: none; counter-reset: s; }
+.process li { counter-increment: s; }
+.process li::before { content: counter(s); display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-family: var(--font-display); font-weight: 700; margin-bottom: 14px; }
+.process h3 { font-size: 1.12rem; margin-bottom: 6px; }
+.process p { color: var(--muted); font-size: 15px; }
+
+.about { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 56px; align-items: start; }
+.avatar { aspect-ratio: 4 / 5; max-width: 100%; border-radius: 18px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; font-family: var(--font-display); font-size: 4.2rem; font-weight: 700; letter-spacing: -0.03em; border: 1px solid var(--line); }
+.about p + p { margin-top: 14px; }
+.about .body { color: var(--muted); max-width: 60ch; margin-top: 18px; }
+.creds { margin: 22px 0 0; padding: 0; list-style: none; display: grid; gap: 8px; font-size: 15px; }
+.creds li { padding-top: 8px; border-top: 1px solid var(--line); }
+
+.faq { margin-top: 32px; max-width: 760px; }
+.faq details { border-top: 1px solid var(--line); padding-block: 16px; }
+.faq details:last-child { border-bottom: 1px solid var(--line); }
+.faq summary { cursor: pointer; font-weight: 600; list-style: none; display: flex; justify-content: space-between; gap: 16px; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: "+"; color: var(--accent); font-size: 1.3rem; line-height: 1; }
+.faq details[open] summary::after { content: "−"; }
+.faq details p { margin-top: 10px; color: var(--muted); max-width: 62ch; }
+
+.contact { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px; margin-top: 32px; }
+.contact h3 { font-size: 1rem; margin-bottom: 8px; }
+.contact p { color: var(--muted); font-size: 15px; }
+.contact .sel { user-select: all; color: var(--ink); }
+.legal { padding-block: 28px 44px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+
+@media (max-width: 900px) {
+  .hero { grid-template-columns: minmax(0, 1fr); gap: 40px; }
+  .areas, .contact, .process { grid-template-columns: minmax(0, 1fr); gap: 0 0; }
+  .process { gap: 28px; }
+  .contact { gap: 24px; }
+  .about { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+  .avatar { max-width: 200px; }
+  .nav a.link { display: none; }
+}
+@media (max-width: 480px) {
+  .book { padding: 18px; }
+  .facts li { flex-direction: column; gap: 2px; }
+  .facts b { min-width: 0; }
+  .sec { padding-block: 52px; }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+/* Presupuesto orientativo */
+.pq { margin-top: 36px; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: 40px; align-items: start; }
+.pq-list { display: grid; gap: 10px; }
+.pq-card { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 24px; box-shadow: 0 18px 40px -24px rgba(18, 41, 44, 0.35); }
+.pq-total { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+.pq-total span { font-size: 13px; font-weight: 600; color: var(--muted); }
+.pq-total b { font-family: var(--font-display); font-size: 1.5rem; font-variant-numeric: tabular-nums; }
+.pq-note { margin: 12px 0 18px; font-size: 13px; color: var(--muted); }
+.pq-done h3 { font-size: 1.3rem; margin-bottom: 10px; }
+.pq-done p { color: var(--muted); margin-bottom: 12px; }
+.pq-done ul { margin: 0 0 16px; padding-left: 20px; }
+.pq-done .note { font-size: 13.5px; background: var(--accent-soft); border-radius: 12px; padding: 12px 14px; color: var(--ink); }
+@media (max-width: 900px) { .pq { grid-template-columns: minmax(0, 1fr); gap: 24px; } }
+[hidden] { display: none !important; }
+</style>
+
+<div class="demo"><div class="wrap"><span><b>Web de muestra.</b> Textos, precios y horarios son de ejemplo.</span><span>La reserva y el presupuesto funcionan, pero no envían nada.</span></div></div>
+
+<header class="wrap top">
+  <a class="brand" href="#inicio"><b>Taller Ribes Motor</b><span>Taller mecánico</span></a>
+  <nav class="nav" aria-label="Principal">
+    <a class="link" href="#presupuesto">Presupuesto</a>
+    <a class="link" href="#ayuda">Qué reparamos</a>
+    <a class="link" href="#primera-sesion">Cómo funciona</a>
+    <a class="link" href="#sobre-mi">Quiénes somos</a>
+    <a class="link" href="#preguntas">Preguntas</a>
+    <a class="btn" href="#reserva">Reservar cita</a>
+  </nav>
+</header>
+
+<main id="inicio">
+  <section class="wrap hero">
+    <div>
+      <p class="eyebrow">Taller mecánico en Castellón</p>
+      <h1>Tu coche, en buenas manos y sin esperas.</h1>
+      <p class="lead">Reserva cita previa online para revisión, aceite, frenos o diagnosis. Te confirmamos por correo y te avisamos cuando esté listo.</p>
+      <p class="next-free" id="nextFree" aria-live="polite"><i></i><span>Buscando el próximo hueco libre…</span></p>
+      <ul class="facts">
+        <li><b>Precio claro</b><span>Te decimos el presupuesto antes de empezar</span></li>
+        <li><b>Cita previa</b><span>Sin esperas y sin llamadas para pedir hora</span></li>
+        <li><b>Aviso por mensaje</b><span>Te escribimos cuando tu coche está listo</span></li>
+      </ul>
+    </div>
+
+    <form class="book" id="reserva" novalidate aria-labelledby="bookTitle">
+      <div id="flow">
+        <h2 id="bookTitle">Reserva tu cita</h2>
+        <ol class="steps" id="steps">
+          <li>1. Servicio</li><li>2. Fecha y hora</li><li>3. Tus datos</li>
+        </ol>
+
+        <div id="p1">
+          <span class="label" id="lblSvc">Elige qué necesita tu coche</span>
+          <div class="opts" id="svcList" role="group" aria-labelledby="lblSvc"></div>
+        </div>
+
+        <div id="p2" hidden>
+          <div class="cal-head"><span class="label" style="margin:0">Elige un día</span><span id="calTitle"></span></div>
+          <div class="cal" id="cal"></div>
+          <div class="slots" id="slots" aria-live="polite"></div>
+        </div>
+
+        <div id="p3" hidden>
+          <div class="field" id="f-nombre">
+            <label class="label" for="nombre">Nombre y apellidos</label>
+            <input id="nombre" name="nombre" autocomplete="name" placeholder="Ana García López">
+            <span class="err" id="e-nombre"></span>
+          </div>
+          <div class="field" id="f-email">
+            <label class="label" for="email">Correo electrónico</label>
+            <input id="email" name="email" type="email" autocomplete="email" placeholder="ana@ejemplo.com">
+            <span class="err" id="e-email"></span>
+          </div>
+          <div class="field" id="f-tel">
+            <label class="label" for="tel">Teléfono</label>
+            <input id="tel" name="tel" type="tel" autocomplete="tel" placeholder="600 000 000">
+            <span class="err" id="e-tel"></span>
+          </div>
+          <div class="field">
+            <label class="label" for="motivo">Marca, modelo y qué le pasa (opcional)</label>
+            <textarea id="motivo" name="motivo" placeholder="Por ejemplo: Seat León 2016, hace ruido al frenar."></textarea>
+          </div>
+          <label class="check"><input type="checkbox" id="priv"><span>He leído la política de privacidad y acepto que se traten mis datos para gestionar la cita.</span></label>
+          <span class="err" id="e-priv"></span>
+        </div>
+
+        <div class="foot">
+          <p class="summary" id="summary"></p>
+          <div class="actions">
+            <button type="button" class="btn ghost" id="back" hidden>Atrás</button>
+            <button type="button" class="btn" id="next">Continuar</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="done" id="done" hidden>
+        <div class="tick" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+        <h2>Cita reservada</h2>
+        <dl id="doneList"></dl>
+        <p class="note">Esto es una demostración. En tu web real, la reserva llegaría a tu agenda y el cliente recibiría un correo de confirmación.</p>
+        <button type="button" class="btn ghost" id="again">Probar otra reserva</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="sec" id="presupuesto">
+    <div class="wrap">
+      <h2>Presupuesto orientativo</h2>
+      <p class="intro">Marca lo que necesita tu coche y verás un precio aproximado al momento. Si quieres el precio exacto, te lo preparamos sin compromiso.</p>
+      <div class="pq">
+        <div>
+          <span class="label">Qué necesita tu coche</span>
+          <div class="pq-list" id="pqList"></div>
+        </div>
+        <div class="pq-card">
+          <div id="pqFlow">
+            <div class="pq-total"><span>Precio orientativo</span><b id="pqTotal">Elige un servicio</b></div>
+            <p class="pq-note">IVA incluido. Es una estimación para un coche normal: el precio final depende del modelo y de las piezas.</p>
+            <div class="field" id="pf-nombre">
+              <label class="label" for="pq-nombre">Nombre</label>
+              <input id="pq-nombre" autocomplete="name" placeholder="Ana García">
+              <span class="err" id="pe-nombre"></span>
+            </div>
+            <div class="field" id="pf-tel">
+              <label class="label" for="pq-tel">Teléfono</label>
+              <input id="pq-tel" type="tel" autocomplete="tel" placeholder="600 000 000">
+              <span class="err" id="pe-tel"></span>
+            </div>
+            <div class="field">
+              <label class="label" for="pq-coche">Marca, modelo y matrícula (opcional)</label>
+              <input id="pq-coche" placeholder="Seat León 2016, 0000 ABC">
+            </div>
+            <div class="field">
+              <label class="label" for="pq-nota">Qué le pasa (opcional)</label>
+              <textarea id="pq-nota" placeholder="Por ejemplo: hace ruido al frenar."></textarea>
+            </div>
+            <label class="check"><input type="checkbox" id="pq-priv"><span>He leído la política de privacidad y acepto que se traten mis datos para preparar el presupuesto.</span></label>
+            <span class="err" id="pe-priv"></span>
+            <p class="err" id="pe-sel"></p>
+            <button type="button" class="btn" id="pqSend" style="margin-top:10px">Pedir presupuesto exacto</button>
+          </div>
+          <div class="pq-done" id="pqDone" hidden>
+            <h3>Solicitud enviada</h3>
+            <p id="pqDoneText"></p>
+            <ul id="pqDoneList"></ul>
+            <p class="note">Esto es una demostración. En tu web real, la solicitud te llegaría por correo o WhatsApp con los datos del cliente.</p>
+            <button type="button" class="btn ghost" id="pqAgain">Pedir otro presupuesto</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="ayuda">
+    <div class="wrap">
+      <h2>Qué reparamos</h2>
+      <p class="intro">Mecánica general para coches de todas las marcas, con presupuesto antes de empezar.</p>
+      <div class="areas">
+        <div><h3>Mantenimiento</h3><p>Aceite, filtros, correa de distribución y revisiones periódicas.</p></div>
+        <div><h3>Frenos</h3><p>Pastillas, discos y líquido de frenos, con prueba final.</p></div>
+        <div><h3>Neumáticos</h3><p>Cambio, equilibrado y alineado de dirección.</p></div>
+        <div><h3>Aire acondicionado</h3><p>Revisión, recarga de gas y limpieza del circuito.</p></div>
+        <div><h3>Diagnosis electrónica</h3><p>Lectura de averías, testigos encendidos y sensores.</p></div>
+        <div><h3>Pre-ITV</h3><p>Revisamos tu coche antes de pasar la inspección.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="primera-sesion">
+    <div class="wrap">
+      <h2>Cómo funciona</h2>
+      <p class="intro">Pide hora en un minuto y olvídate de llamar.</p>
+      <ol class="process">
+        <li><h3>Reserva tu cita</h3><p>Eliges el servicio, el día y la hora. Cuéntanos marca, modelo y qué le pasa.</p></li>
+        <li><h3>Presupuesto antes de empezar</h3><p>Revisamos el coche y te decimos el precio. No hacemos nada sin tu visto bueno.</p></li>
+        <li><h3>Te avisamos</h3><p>Cuando está listo, te escribimos para que lo recojas.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="sec" id="sobre-mi">
+    <div class="wrap about">
+      <div class="avatar" role="img" aria-label="Espacio para la foto del negocio">RM</div>
+      <div>
+        <h2>Quiénes somos</h2>
+        <p class="body">Somos un taller de barrio con más de quince años de experiencia. Explicamos qué le pasa al coche en palabras claras y te enseñamos la pieza cambiada si quieres verla. Trabajamos con cita para dedicarle a cada coche el tiempo que necesita.</p>
+        <ul class="creds">
+          <li>Más de quince años de experiencia en mecánica</li>
+          <li>Diagnosis electrónica con equipo propio</li>
+          <li>Garantía por escrito en cada reparación</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="preguntas">
+    <div class="wrap">
+      <h2>Preguntas frecuentes</h2>
+      <div class="faq">
+        <details><summary>¿Necesito cita?</summary><p>Sí, trabajamos con cita para no tener tu coche parado más de lo necesario. Reservas aquí en un minuto.</p></details>
+        <details><summary>¿Me dais presupuesto antes?</summary><p>Siempre. Revisamos el coche, te decimos el precio y solo empezamos si estás de acuerdo.</p></details>
+        <details><summary>¿Trabajáis con todas las marcas?</summary><p>Sí, con coches de todas las marcas, de gasolina y diésel.</p></details>
+        <details><summary>¿Tiene garantía la reparación?</summary><p>Sí. Cada reparación incluye garantía por escrito de piezas y mano de obra.</p></details>
+        <details><summary>¿Qué formas de pago aceptáis?</summary><p>Tarjeta, Bizum, transferencia o efectivo. Entregamos factura.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="contacto">
+    <div class="wrap">
+      <h2>Contacto</h2>
+      <div class="contact">
+        <div><h3>Dónde estamos</h3><p>Calle de Ejemplo, 22, nave 3<br>12001 Castellón de la Plana</p></div>
+        <div><h3>Horario</h3><p>Lunes a viernes: 08:00 a 14:00 y 15:00 a 18:00<br>Sábado y domingo: cerrado</p></div>
+        <div><h3>Escríbenos</h3><p><span class="sel">600 000 000</span><br><span class="sel">taller@ribesmotor.example</span></p></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap legal">
+  <span>© 2026 Taller Ribes Motor</span>
+  <span>Aviso legal · Privacidad · Cookies</span>
+</footer>
+
+<script>
+(function () {
+  var SERVICES = [
+    { id: 'aceite', name: 'Cambio de aceite y filtros', min: 45, price: 59, desc: 'Aceite, filtro y revisión de niveles' },
+    { id: 'preitv', name: 'Revisión pre-ITV', min: 60, price: 39, desc: 'Comprobamos todo antes de la inspección' },
+    { id: 'diagnosis', name: 'Diagnosis de averías', min: 60, price: 35, desc: 'Lectura electrónica y presupuesto' },
+    { id: 'frenos', name: 'Revisión de frenos', min: 60, price: 29, desc: 'Pastillas, discos y líquido' }
+  ];
+  var state = { step: 1, service: 'aceite', mode: '', date: null, time: null };
+  var $ = function (s) { return document.querySelector(s); };
+  var pad = function (n) { return (n < 10 ? '0' : '') + n; };
+  var fmtLong = new Intl.DateTimeFormat('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+  var fmtShort = new Intl.DateTimeFormat('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
+  var fmtMonth = new Intl.DateTimeFormat('es-ES', { month: 'long' });
+
+  var now = new Date();
+  var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  var days = [];
+  for (var i = 0; i < 14; i++) days.push(new Date(today.getFullYear(), today.getMonth(), today.getDate() + i));
+
+  function iso(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  function parse(s) { var p = s.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+  function svc() { return SERVICES.filter(function (s) { return s.id === state.service; })[0]; }
+
+  // Horas libres de ejemplo: lunes a jueves mañana y tarde, viernes solo mañana.
+  function slotsFor(d) {
+    var wd = d.getDay();
+    if (wd === 0 || wd === 6 || d < today) return [];
+    var hours = [8, 9, 10, 11, 12, 13, 15, 16, 17];
+    var doy = Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 864e5);
+    var out = hours.filter(function (h) { return ((doy * 7 + h * 3) % 5) !== 0; });
+    if (iso(d) === iso(today)) {
+      var mins = now.getHours() * 60 + now.getMinutes() + 120;
+      out = out.filter(function (h) { return h * 60 >= mins; });
+    }
+    return out;
+  }
+
+  function renderNextFree() {
+    var el = $('#nextFree span');
+    for (var i = 0; i < days.length; i++) {
+      var s = slotsFor(days[i]);
+      if (s.length) {
+        var when = i === 0 ? 'hoy' : i === 1 ? 'mañana' : fmtShort.format(days[i]);
+        el.innerHTML = 'Próximo hueco libre: <b>' + when + ' a las ' + pad(s[0]) + ':00</b>';
+        return;
+      }
+    }
+    el.textContent = 'Consulta los próximos huecos en el calendario.';
+  }
+
+  function renderServices() {
+    var box = $('#svcList');
+    box.innerHTML = '';
+    SERVICES.forEach(function (s) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'opt';
+      b.setAttribute('aria-pressed', String(state.service === s.id));
+      var left = document.createElement('span');
+      var t = document.createElement('b');
+      t.textContent = s.name + ' · ' + s.min + ' min';
+      var sm = document.createElement('small');
+      sm.textContent = s.desc;
+      left.appendChild(t);
+      left.appendChild(sm);
+      var pr = document.createElement('span');
+      pr.className = 'price';
+      pr.textContent = s.price + ' €';
+      b.appendChild(left);
+      b.appendChild(pr);
+      b.addEventListener('click', function () { state.service = s.id; renderServices(); update(); });
+      box.appendChild(b);
+    });
+  }
+
+  function renderCal() {
+    var grid = $('#cal');
+    grid.innerHTML = '';
+    ['L', 'M', 'X', 'J', 'V', 'S', 'D'].forEach(function (l) {
+      var e = document.createElement('span');
+      e.className = 'wd';
+      e.textContent = l;
+      grid.appendChild(e);
+    });
+    var lead = (days[0].getDay() + 6) % 7;
+    for (var k = 0; k < lead; k++) grid.appendChild(document.createElement('span'));
+    days.forEach(function (d) {
+      var free = slotsFor(d).length > 0;
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'day';
+      b.textContent = d.getDate();
+      b.disabled = !free;
+      b.setAttribute('aria-pressed', String(state.date === iso(d)));
+      b.setAttribute('aria-label', fmtLong.format(d) + (free ? '' : ', sin huecos'));
+      b.addEventListener('click', function () {
+        state.date = iso(d);
+        state.time = null;
+        renderCal();
+        renderSlots();
+        update();
+      });
+      grid.appendChild(b);
+    });
+    var a = fmtMonth.format(days[0]), z = fmtMonth.format(days[days.length - 1]);
+    $('#calTitle').textContent = (a === z ? a : a + ' y ' + z) + ' ' + days[days.length - 1].getFullYear();
+  }
+
+  function renderSlots() {
+    var box = $('#slots');
+    box.innerHTML = '';
+    if (!state.date) {
+      var p = document.createElement('p');
+      p.className = 'hint';
+      p.textContent = 'Elige un día para ver las horas libres.';
+      box.appendChild(p);
+      return;
+    }
+    var hs = slotsFor(parse(state.date));
+    [['Mañana', function (h) { return h < 14; }], ['Tarde', function (h) { return h >= 14; }]].forEach(function (grp) {
+      var list = hs.filter(grp[1]);
+      if (!list.length) return;
+      var g = document.createElement('div');
+      var t = document.createElement('p');
+      t.className = 'slot-label';
+      t.textContent = grp[0];
+      var row = document.createElement('div');
+      row.className = 'slot-row';
+      list.forEach(function (h) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'slot';
+        b.textContent = pad(h) + ':00';
+        b.setAttribute('aria-pressed', String(state.time === h));
+        b.addEventListener('click', function () { state.time = h; renderSlots(); update(); });
+        row.appendChild(b);
+      });
+      g.appendChild(t);
+      g.appendChild(row);
+      box.appendChild(g);
+    });
+  }
+
+  function summaryText() {
+    var s = svc();
+    var parts = [s.name];
+    if (state.date) parts.push(fmtShort.format(parse(state.date)));
+    if (state.time !== null) parts.push(pad(state.time) + ':00');
+    return parts.join(' · ') + ' · ' + s.price + ' €';
+  }
+
+  function update() {
+    $('#summary').innerHTML = '<b>Tu cita:</b> ' + summaryText();
+    $('#back').hidden = state.step === 1;
+    var next = $('#next');
+    next.textContent = state.step === 3 ? 'Confirmar reserva' : 'Continuar';
+    next.disabled = state.step === 2 && (!state.date || state.time === null);
+    ['#p1', '#p2', '#p3'].forEach(function (id, i) { $(id).hidden = state.step !== i + 1; });
+    var items = document.querySelectorAll('#steps li');
+    for (var i = 0; i < items.length; i++) {
+      items[i].className = i + 1 === state.step ? 'on' : i + 1 < state.step ? 'done' : '';
+    }
+  }
+
+  function setErr(id, msg) {
+    $('#e-' + id).textContent = msg || '';
+    var f = $('#f-' + id);
+    if (f) f.classList.toggle('bad', !!msg);
+  }
+
+  function validate() {
+    var ok = true;
+    var nombre = $('#nombre').value.trim();
+    var email = $('#email').value.trim();
+    var tel = $('#tel').value.replace(/[\s.-]/g, '');
+    setErr('nombre', nombre.length < 3 ? 'Escribe tu nombre y apellidos.' : '');
+    setErr('email', /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) ? '' : 'Escribe un correo válido, por ejemplo ana@ejemplo.com.');
+    setErr('tel', /^(\+34)?[6-9]\d{8}$/.test(tel) ? '' : 'Escribe un teléfono de 9 cifras.');
+    setErr('priv', $('#priv').checked ? '' : 'Marca la casilla para poder reservar.');
+    if (nombre.length < 3 || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) || !/^(\+34)?[6-9]\d{8}$/.test(tel) || !$('#priv').checked) ok = false;
+    return ok;
+  }
+
+  function confirmBooking() {
+    var s = svc();
+    var rows = [
+      ['Servicio', s.name + ' (' + s.min + ' min)'],
+      ['Día', fmtLong.format(parse(state.date))],
+      ['Hora', pad(state.time) + ':00'],
+      ['Precio', s.price + ' €'],
+      ['A nombre de', $('#nombre').value.trim()]
+    ];
+    var dl = $('#doneList');
+    dl.innerHTML = '';
+    rows.forEach(function (r) {
+      var dt = document.createElement('dt');
+      dt.textContent = r[0];
+      var dd = document.createElement('dd');
+      dd.textContent = r[1];
+      dl.appendChild(dt);
+      dl.appendChild(dd);
+    });
+    $('#flow').hidden = true;
+    $('#done').hidden = false;
+  }
+
+  $('#next').addEventListener('click', function () {
+    if (state.step === 3) { if (validate()) confirmBooking(); return; }
+    state.step += 1;
+    update();
+    if (state.step === 2) { renderCal(); renderSlots(); }
+  });
+  $('#back').addEventListener('click', function () { if (state.step > 1) { state.step -= 1; update(); } });
+  $('#reserva').addEventListener('submit', function (e) { e.preventDefault(); if (state.step === 3 && validate()) confirmBooking(); });
+  $('#again').addEventListener('click', function () {
+    state.step = 1; state.date = null; state.time = null;
+    ['#nombre', '#email', '#tel', '#motivo'].forEach(function (id) { $(id).value = ''; });
+    $('#priv').checked = false;
+    ['nombre', 'email', 'tel', 'priv'].forEach(function (id) { setErr(id, ''); });
+    $('#done').hidden = true;
+    $('#flow').hidden = false;
+    renderServices();
+    update();
+  });
+  document.querySelectorAll('.seg button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      state.mode = b.getAttribute('data-mode');
+      document.querySelectorAll('.seg button').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+      update();
+    });
+  });
+
+  renderNextFree();
+  renderServices();
+  update();
+})();
+</script>
+<script>
+(function () {
+  var $ = function (s) { return document.querySelector(s); };
+  var ITEMS = [
+    { id: 'aceite', name: 'Cambio de aceite y filtros', desc: 'Aceite, filtro y revisión de niveles', min: 55, max: 95 },
+    { id: 'pastillas', name: 'Pastillas de freno delanteras', desc: 'Cambio de pastillas con prueba final', min: 80, max: 150 },
+    { id: 'discos', name: 'Discos y pastillas delanteros', desc: 'Cambio completo del tren delantero de frenos', min: 190, max: 330 },
+    { id: 'correa', name: 'Correa de distribución', desc: 'Correa, tensores y bomba de agua según modelo', min: 350, max: 650 },
+    { id: 'aire', name: 'Recarga de aire acondicionado', desc: 'Revisión, gas y limpieza del circuito', min: 60, max: 95 },
+    { id: 'ruedas', name: 'Neumáticos: cambio y equilibrado', desc: 'Montaje y equilibrado de 4 ruedas (sin neumáticos)', min: 60, max: 100 },
+    { id: 'diag', name: 'Diagnosis de averías', desc: 'Lectura electrónica y presupuesto', min: 35, max: 35 },
+    { id: 'itv', name: 'Revisión pre-ITV', desc: 'Comprobamos todo antes de la inspección', min: 39, max: 39 }
+  ];
+  var chosen = {};
+  var fmt = new Intl.NumberFormat('es-ES');
+
+  function range(a, b) { return a === b ? fmt.format(a) + ' €' : fmt.format(a) + ' € – ' + fmt.format(b) + ' €'; }
+
+  function totals() {
+    var a = 0, b = 0, n = 0;
+    ITEMS.forEach(function (it) { if (chosen[it.id]) { a += it.min; b += it.max; n += 1; } });
+    return { min: a, max: b, n: n };
+  }
+
+  function render() {
+    var box = $('#pqList');
+    box.innerHTML = '';
+    ITEMS.forEach(function (it) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'opt';
+      btn.setAttribute('aria-pressed', String(!!chosen[it.id]));
+      var left = document.createElement('span');
+      var b = document.createElement('b');
+      b.textContent = it.name;
+      var s = document.createElement('small');
+      s.textContent = it.desc;
+      left.appendChild(b);
+      left.appendChild(s);
+      var pr = document.createElement('span');
+      pr.className = 'price';
+      pr.textContent = range(it.min, it.max);
+      btn.appendChild(left);
+      btn.appendChild(pr);
+      btn.addEventListener('click', function () { chosen[it.id] = !chosen[it.id]; $('#pe-sel').textContent = ''; render(); });
+      box.appendChild(btn);
+    });
+    var t = totals();
+    $('#pqTotal').textContent = t.n ? range(t.min, t.max) : 'Elige un servicio';
+  }
+
+  function setErr(id, msg, fieldId) {
+    $('#pe-' + id).textContent = msg || '';
+    var f = $('#pf-' + (fieldId || id));
+    if (f) f.classList.toggle('bad', !!msg);
+  }
+
+  function send() {
+    var nombre = $('#pq-nombre').value.trim();
+    var tel = $('#pq-tel').value.replace(/[\s.-]/g, '');
+    var t = totals();
+    var nota = $('#pq-nota').value.trim();
+    var ok = true;
+    setErr('nombre', nombre.length < 2 ? 'Escribe tu nombre.' : '');
+    setErr('tel', /^(\+34)?[6-9]\d{8}$/.test(tel) ? '' : 'Escribe un teléfono de 9 cifras.');
+    setErr('priv', $('#pq-priv').checked ? '' : 'Marca la casilla para poder enviarlo.');
+    if (!t.n && !nota) { $('#pe-sel').textContent = 'Elige algún servicio o cuéntanos qué le pasa al coche.'; ok = false; } else { $('#pe-sel').textContent = ''; }
+    if (nombre.length < 2 || !/^(\+34)?[6-9]\d{8}$/.test(tel) || !$('#pq-priv').checked) ok = false;
+    if (!ok) return;
+    $('#pqDoneText').textContent = 'Gracias, ' + nombre.split(' ')[0] + '. Te llamaremos para darte el precio exacto.' + (t.n ? ' Estimación inicial: ' + range(t.min, t.max) + '.' : '');
+    var ul = $('#pqDoneList');
+    ul.innerHTML = '';
+    ITEMS.forEach(function (it) {
+      if (chosen[it.id]) { var li = document.createElement('li'); li.textContent = it.name; ul.appendChild(li); }
+    });
+    if (nota) { var l2 = document.createElement('li'); l2.textContent = 'Nota: ' + nota; ul.appendChild(l2); }
+    $('#pqFlow').hidden = true;
+    $('#pqDone').hidden = false;
+  }
+
+  $('#pqSend').addEventListener('click', send);
+  $('#pqAgain').addEventListener('click', function () {
+    chosen = {};
+    ['#pq-nombre', '#pq-tel', '#pq-coche', '#pq-nota'].forEach(function (id) { $(id).value = ''; });
+    $('#pq-priv').checked = false;
+    ['nombre', 'tel', 'priv'].forEach(function (id) { setErr(id, ''); });
+    $('#pe-sel').textContent = '';
+    $('#pqDone').hidden = true;
+    $('#pqFlow').hidden = false;
+    render();
+  });
+  render();
+})();
+</script>
+
